@@ -1,21 +1,93 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-</div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
+<mat-drawer-container class="viewer-root" [hasBackdrop]="true">
+  <!-- START: Left Drawer to show Table of Contents  -->
+  <mat-drawer #leftDrawer mode="over" position="start">
+    <mat-toolbar text-center>
+      <button mat-icon-button aria-label="Close" (click)="leftDrawer.close()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <span flex-grow>Table of Contents</span>
+    </mat-toolbar>
+    <!-- Show loading while epub functions -->
+    <div *ngIf="contentLoading" loading>
+      <mat-spinner [strokeWidth]="3" [diameter]="40"></mat-spinner>
+    </div>
 
-<router-outlet></router-outlet>
+    <div *ngIf="!contentLoading">
+      <mat-action-list>
+        <button mat-list-item *ngFor="let tocItem of epubBook.navigation.toc" (click)="gotoFromToc(tocItem)">
+          {{tocItem.label}}
+        </button>
+      </mat-action-list>
+    </div>
+  </mat-drawer>
+  <!-- END: Left Drawer to show Table of Contents  -->
+
+  <!-- START: Content to show Book contents  -->
+  <mat-drawer-content>
+    <mat-toolbar book-content-toolbar>
+      <button mat-icon-button aria-label="Table of Contents" (click)="leftDrawer.open()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span text-center book-title>Title</span>
+      <button mat-icon-button aria-label="Bookmark" (click)="toggleBookmarkCurrentPage()">
+        <mat-icon *ngIf="isCurrentPageBookmarked">bookmark</mat-icon>
+        <mat-icon *ngIf="!isCurrentPageBookmarked">bookmark_border</mat-icon>
+      </button>
+      <button mat-icon-button aria-label="Formatting" (click)="openFormattingActionSheet()">
+        <mat-icon>format_size</mat-icon>
+      </button>
+      <button mat-icon-button aria-label="Information" (click)="openRightPane()">
+        <mat-icon>widgets</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <div book-container id="bcontainer">
+      <!-- Show loading while epub functions -->
+      <div *ngIf="contentLoading" loading>
+        <mat-spinner [strokeWidth]="3" [diameter]="40"></mat-spinner>
+      </div>
+      <div id="book_content"></div>
+      <div click-handler (click)="emulateSwipe($event)"></div>
+    </div>
+
+    <!-- Book progress for the current chapter -->
+    <mat-progress-bar mode="determinate" [value]="currentChapterReadingProgress" color="warn"></mat-progress-bar>
+
+  </mat-drawer-content>
+  <!-- END: Content to show Book contents  -->
+
+  <!-- START: Right Drawer to show Contextual Menus  -->
+  <mat-drawer #rightDrawer mode="over" position="end">
+    <mat-toolbar text-center right-panel-toolbar>
+      <button mat-icon-button aria-label="Close" (click)="closeRightPanel()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <!-- <span flex-grow *ngIf="rightPaneAction=='bookmark'">Bookmarks</span>
+      <div flex-grow *ngIf="rightPaneAction=='search'">
+        <mat-form-field appearance="standard">
+          <input matInput placeholder="Search" #epubSearchInput>
+        </mat-form-field>
+        <button mat-icon-button aria-label="Search" (click)="doSearch(epubSearchInput.value)">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+      <span flex-grow *ngIf="rightPaneAction=='settings'">Settings</span> -->
+    </mat-toolbar>
+    <!-- Show loading while epub functions -->
+    <div *ngIf="contentLoading" loading>
+      <mat-spinner [strokeWidth]="3" [diameter]="40"></mat-spinner>
+    </div>
+
+    <div text-center *ngIf="!contentLoading" cover-info-container>
+      <div><img [src]="epubBookCover" alt="Cover Image" cover-image></div>
+      <div cover-title>{{epubBookTitle}}</div>
+      <div cover-author>{{epubBookAuthor}}</div>
+    </div>
+
+    <div *ngIf="!contentLoading">
+      Right Drawer Right Drawer Right Drawer Right Drawer Right Drawer Right Drawer Right Drawer Right Drawer
+    </div>
+  </mat-drawer>
+  <!-- END: Right Drawer to show Contextual Menus  -->
+
+</mat-drawer-container>

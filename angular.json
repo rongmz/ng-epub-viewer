@@ -29,7 +29,10 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/epubjs/dist/epub.min.js",
+              "node_modules/jszip/dist/jszip.min.js"
+            ]
           },
           "configurations": {
             "production": {
