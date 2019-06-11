@@ -6,6 +6,7 @@ import { NgMaterialModule } from './ng-material';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ThemeActionSheetComponent } from './theme-action-sheet/theme-action-sheet.component';
+import { EPubService } from './e-pub/e-pub.service';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,9 @@ import { ThemeActionSheetComponent } from './theme-action-sheet/theme-action-she
     NgMaterialModule,
     AppRoutingModule
   ],
-  providers: [],
+  providers: [
+    EPubService,
+  ],
   bootstrap: [AppComponent],
   entryComponents: [
     AppComponent,

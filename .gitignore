@@ -45,3 +45,4 @@ testem.log
 .DS_Store
 Thumbs.db
 github-auth
+src/assets/sample.epub

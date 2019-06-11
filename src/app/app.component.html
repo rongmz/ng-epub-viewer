@@ -14,7 +14,7 @@
 
     <div *ngIf="!contentLoading">
       <mat-action-list>
-        <button mat-list-item *ngFor="let tocItem of epubBook.navigation.toc" (click)="gotoFromToc(tocItem)">
+        <button mat-list-item *ngFor="let tocItem of ePubService.getBookTOC()" (click)="gotoFromToc(tocItem)">
           {{tocItem.label}}
         </button>
       </mat-action-list>
@@ -79,9 +79,9 @@
     </div>
 
     <div text-center *ngIf="!contentLoading" cover-info-container>
-      <div><img [src]="epubBookCover" alt="Cover Image" cover-image></div>
-      <div cover-title>{{epubBookTitle}}</div>
-      <div cover-author>{{epubBookAuthor}}</div>
+      <div><img [src]="ePubService.epubBookCover" alt="Cover Image" cover-image></div>
+      <div cover-title>{{ePubService.epubBookTitle}}</div>
+      <div cover-author>{{ePubService.epubBookAuthor}}</div>
     </div>
 
     <div *ngIf="!contentLoading">

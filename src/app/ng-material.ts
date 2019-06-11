@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { MatRadioModule } from '@angular/material/radio';
+// import { MatRadioModule } from '@angular/material/radio';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -12,10 +12,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import {MatBottomSheetModule} from '@angular/material/bottom-sheet';
+import {MatSliderModule} from '@angular/material/slider';
 
 @NgModule({
   imports: [
-    MatRadioModule,
+    // MatRadioModule,
     MatFormFieldModule,
     MatInputModule,
     MatSidenavModule,
@@ -28,9 +29,10 @@ import {MatBottomSheetModule} from '@angular/material/bottom-sheet';
     MatProgressSpinnerModule,
     MatProgressBarModule,
     MatBottomSheetModule,
+    MatSliderModule,
   ],
   exports: [
-    MatRadioModule,
+    // MatRadioModule,
     MatFormFieldModule,
     MatInputModule,
     MatSidenavModule,
@@ -43,6 +45,7 @@ import {MatBottomSheetModule} from '@angular/material/bottom-sheet';
     MatProgressSpinnerModule,
     MatProgressBarModule,
     MatBottomSheetModule,
+    MatSliderModule,
   ],
 })
 export class NgMaterialModule { }

@@ -3,6 +3,7 @@ import { MatDrawer } from '@angular/material/sidenav';
 import epub, { Book, Rendition } from 'epubjs';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ThemeActionSheetComponent } from './theme-action-sheet/theme-action-sheet.component';
+import { EPubService } from './e-pub/e-pub.service';
 
 @Component({
   selector: 'app-root',
@@ -17,16 +18,16 @@ export class AppComponent implements AfterViewInit {
   //rightPaneAction: string = '';
   contentLoading: boolean = true;
 
-  epubBook: Book;
-  ePubRendition: Rendition;
-  epubBookCover: string;
-  epubBookTitle: string;
-  epubBookAuthor: string;
+  // epubBook: Book;
+  // ePubRendition: Rendition;
+  // epubBookCover: string;
+  // epubBookTitle: string;
+  // epubBookAuthor: string;
   readingAreaRect: ClientRect;
   currentChapterReadingProgress: number = 0;
-  isCurrentPageBookmarked: boolean = false;
+  // isCurrentPageBookmarked: boolean = false;
 
-  constructor(private _bottomSheet: MatBottomSheet) {
+  constructor(private _bottomSheet: MatBottomSheet, public ePubService: EPubService) {
     let params = window.location.search
       .substring(1)
       .split("&")
@@ -44,20 +45,24 @@ export class AppComponent implements AfterViewInit {
   ngAfterViewInit() {
     if (this.epubFile) {
       this.contentLoading = true;
-      this.epubBook = epub(this.epubFile);
+      // this.epubBook = epub(this.epubFile);
       this.readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
-      this.ePubRendition = this.epubBook.renderTo('book_content',
-                               {width:this.readingAreaRect.width, height:this.readingAreaRect.height})
-      this.ePubRendition.display().then(() => {
+      // this.ePubRendition = this.epubBook.renderTo('book_content',
+      //                          {width:this.readingAreaRect.width, height:this.readingAreaRect.height})
+      // this.ePubRendition.display().then(() => {
+      this.ePubService.loadBook(this.epubFile, 'book_content', {
+        width: this.readingAreaRect.width,
+        height: this.readingAreaRect.height
+      }).then(() => {
         this.contentLoading = false;
-        let coverUrl = (<any>this.epubBook).cover;
-        this.epubBook.archive.getBase64(coverUrl).then((data) => this.epubBookCover = data);
-        this.epubBook.loaded.metadata.then((metadata) => {
-          this.epubBookTitle = metadata.title;
-          this.epubBookAuthor = metadata.creator;
-          console.log('info=', this.epubBookTitle, this.epubBookAuthor);
-        });
-        console.log('book=', this.epubBook, 'rendition=', this.ePubRendition, 'cover=', this.epubBookCover);
+        // let coverUrl = (<any>this.epubBook).cover;
+        // this.epubBook.archive.getBase64(coverUrl).then((data) => this.epubBookCover = data);
+        // this.epubBook.loaded.metadata.then((metadata) => {
+        //   this.epubBookTitle = metadata.title;
+        //   this.epubBookAuthor = metadata.creator;
+        //   console.log('info=', this.epubBookTitle, this.epubBookAuthor);
+        // });
+        // console.log('book=', this.epubBook, 'rendition=', this.ePubRendition, 'cover=', this.epubBookCover);
       }).catch(err => {
         console.log('some error while reading epub=', err);
       });
@@ -69,9 +74,10 @@ export class AppComponent implements AfterViewInit {
    */
   bookSwipeLeft() {
     this.contentLoading = true;
-    this.readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
-    if(this.ePubRendition) this.ePubRendition.prev().finally(()=> {
-      this.ePubRendition.resize(this.readingAreaRect.width, this.readingAreaRect.height);
+    // this.readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
+    // if(this.ePubRendition) this.ePubRendition.prev().finally(()=> {
+    this.ePubService.navPrev('bcontainer').then((rendition) => {
+      // this.ePubRendition.resize(this.readingAreaRect.width, this.readingAreaRect.height);
       this.contentLoading = false;
       this.updateProgressbar();
     });
@@ -82,9 +88,10 @@ export class AppComponent implements AfterViewInit {
    */
   bookSwipeRight() {
     this.contentLoading = true;
-    this.readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
-    if(this.ePubRendition) this.ePubRendition.next().finally(()=> {
-      this.ePubRendition.resize(this.readingAreaRect.width, this.readingAreaRect.height);
+    // this.readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
+    // if(this.ePubRendition) this.ePubRendition.next().finally(()=> {
+    this.ePubService.navNext('bcontainer').then((rendition) => {
+      // this.ePubRendition.resize(this.readingAreaRect.width, this.readingAreaRect.height);
       this.contentLoading = false;
       this.updateProgressbar();
     });
@@ -95,8 +102,8 @@ export class AppComponent implements AfterViewInit {
    * @param e click event
    */
   emulateSwipe(e) {
-    this.readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
-    this.ePubRendition.resize(this.readingAreaRect.width, this.readingAreaRect.height);
+    // this.readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
+    // this.ePubRendition.resize(this.readingAreaRect.width, this.readingAreaRect.height);
     let rect = document.body.getBoundingClientRect();
     if(e.clientX <= rect.width/3) this.bookSwipeLeft();
     else if(e.clientX >= rect.width*2/3) this.bookSwipeRight();
@@ -108,10 +115,11 @@ export class AppComponent implements AfterViewInit {
    */
   gotoFromToc(tocitem) {
     // this.readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
-    let sec = this.epubBook.spine.get(tocitem.href);
-    console.log('section=',sec);
+    // let sec = this.epubBook.spine.get(tocitem.href);
+    // console.log('section=',sec);
     this.contentLoading = true;
-    this.ePubRendition.display(sec.index).then(() => {
+    // this.ePubRendition.display(sec.index).then(() => {
+    this.ePubService.jumpFromTOC(tocitem).then(() => {
       // this.ePubRendition.resize(this.readingAreaRect.width, this.readingAreaRect.height);
       this.contentLoading = false;
       this.updateProgressbar();
@@ -126,7 +134,8 @@ export class AppComponent implements AfterViewInit {
    * This function updates the progress bar at bottom
    */
   updateProgressbar() {
-    let loc = this.ePubRendition.currentLocation();
+    // let loc = this.ePubRendition.currentLocation();
+    let loc = this.ePubService.ePubRendition.currentLocation();
     // console.log('location', loc);
     loc = (<any>loc).end;
     this.currentChapterReadingProgress = Math.min((100.0 * loc.displayed.page) / loc.displayed.total, 100);
