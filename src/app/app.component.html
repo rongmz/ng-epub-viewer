@@ -1,7 +1,7 @@
 <mat-drawer-container class="viewer-root" [hasBackdrop]="true">
   <!-- START: Left Drawer to show Table of Contents  -->
   <mat-drawer #leftDrawer mode="over" position="start">
-    <mat-toolbar text-center>
+    <mat-toolbar text-center color="primary">
       <button mat-icon-button aria-label="Close" (click)="leftDrawer.close()">
         <mat-icon>arrow_back</mat-icon>
       </button>
@@ -24,14 +24,14 @@
 
   <!-- START: Content to show Book contents  -->
   <mat-drawer-content>
-    <mat-toolbar book-content-toolbar>
+    <mat-toolbar book-content-toolbar color="primary">
       <button mat-icon-button aria-label="Table of Contents" (click)="leftDrawer.open()">
         <mat-icon>menu</mat-icon>
       </button>
       <span text-center book-title>Title</span>
       <button mat-icon-button aria-label="Bookmark" (click)="toggleBookmarkCurrentPage()">
-        <mat-icon *ngIf="isCurrentPageBookmarked">bookmark</mat-icon>
-        <mat-icon *ngIf="!isCurrentPageBookmarked">bookmark_border</mat-icon>
+        <mat-icon *ngIf="ePubService.isCurrentPageBookmarked">bookmark</mat-icon>
+        <mat-icon *ngIf="!ePubService.isCurrentPageBookmarked">bookmark_border</mat-icon>
       </button>
       <button mat-icon-button aria-label="Formatting" (click)="openFormattingActionSheet()">
         <mat-icon>format_size</mat-icon>

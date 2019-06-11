@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { EPubService } from '../e-pub/e-pub.service';
 
 @Component({
   selector: 'app-theme-action-sheet',
@@ -8,7 +9,8 @@ import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 })
 export class ThemeActionSheetComponent implements OnInit {
 
-  constructor(private _bottomSheetRef: MatBottomSheetRef<ThemeActionSheetComponent>) { }
+  constructor(private _bottomSheetRef: MatBottomSheetRef<ThemeActionSheetComponent>,
+    public ePubService: EPubService) { }
 
   ngOnInit() {
   }

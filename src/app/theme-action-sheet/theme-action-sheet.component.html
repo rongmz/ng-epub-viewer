@@ -2,18 +2,37 @@
   <div theme-chooser>
     <h4>Themes</h4>
     <div themes-row>
-      <div><button mat-mini-fab theme-basic>T</button></div>
-      <div><button mat-mini-fab theme-yellow>T</button></div>
-      <div><button mat-mini-fab theme-dark>T</button></div>
-      <div><button mat-mini-fab theme-lightdark>T</button></div>
+      <div *ngFor="let theme of ePubService.themes">
+        <button mat-mini-fab (click)="ePubService.applyTheme(theme)"
+          [ngStyle]="{'background-color':theme.background, 'color':theme.color, 'border':theme.border}">T</button>
+      </div>
     </div>
   </div>
   <mat-divider></mat-divider>
   <div font-size-chooser>
-    Font Size
+    <h4>Font Size</h4>
+    <div themes-row>
+      <div *ngFor="let theme of ePubService.fontSizeThemes">
+        <button mat-mini-fab color="primary" (click)="ePubService.applyFontSizeTheme(theme)"
+          normal-font>{{theme.name}}</button>
+      </div>
+    </div>
+  </div>
+  <mat-divider></mat-divider>
+  <div line-height-chooser>
+    <h4>Line Height</h4>
+    <div themes-row>
+      <div *ngFor="let theme of ePubService.lineHeightThemes">
+        <button mat-mini-fab (click)="ePubService.applyLineHeightTheme(theme)" normal-font>{{theme.name}}</button>
+      </div>
+    </div>
   </div>
   <mat-divider></mat-divider>
   <div font-chooser>
-    Font
+    <h4>Font Size</h4>
+    <div themes-row>
+      <button mat-raised-button *ngFor="let theme of ePubService.fontTheme" (click)="ePubService.applyFontTheme(theme)"
+        normal-font>{{theme.name}}</button>
+    </div>
   </div>
 </div>

@@ -2,11 +2,13 @@
   display: flex;
   flex-direction: column;
 
-  [theme-chooser] {
+  [theme-chooser],
+  [line-height-chooser],
+  [font-size-chooser] {
     padding: 0 0 25px;
 
     h4 {
-      margin-bottom: 15px;
+      margin: 10px 0 14px;
     }
 
     [themes-row] {
@@ -22,31 +24,29 @@
           font-size: 1.6em;
         }
 
-        [theme-basic] {
-          background: #FFF;
-          border: 1px solid #a5a5a5;
-          color: #000;
-        }
-
-        [theme-yellow] {
-          background: #FFDA8C;
-          border: 1px solid #FFF;
-          color: #413322;
-        }
-
-        [theme-dark] {
-          background: #000;
-          border: 1px solid #000;
-          color: #fff;
-        }
-
-        [theme-lightdark] {
-          background: #3f3f3f;
-          border: 1px solid #000;
-          color: #cfae6a;
+        button[normal-font] {
+          font-weight: bold;
+          font-size: 1em;
         }
 
 
+      }
+    }
+  }
+
+  [font-chooser] {
+    padding: 0 0 25px;
+
+    h4 {
+      margin: 10px 0 14px;
+    }
+
+    [themes-row] {
+      display: block;
+      text-align: center;
+
+      button {
+        margin: 0 0 8px;
       }
     }
   }
