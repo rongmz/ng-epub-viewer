@@ -28,7 +28,7 @@
       <button mat-icon-button aria-label="Table of Contents" (click)="leftDrawer.open()">
         <mat-icon>menu</mat-icon>
       </button>
-      <span text-center book-title>Title</span>
+      <span book-title>{{ePubService.epubBookTitle}}</span>
       <button mat-icon-button aria-label="Bookmark" (click)="toggleBookmarkCurrentPage()">
         <mat-icon *ngIf="ePubService.isCurrentPageBookmarked">bookmark</mat-icon>
         <mat-icon *ngIf="!ePubService.isCurrentPageBookmarked">bookmark_border</mat-icon>
@@ -57,36 +57,70 @@
   <!-- END: Content to show Book contents  -->
 
   <!-- START: Right Drawer to show Contextual Menus  -->
-  <mat-drawer #rightDrawer mode="over" position="end">
-    <mat-toolbar text-center right-panel-toolbar>
-      <button mat-icon-button aria-label="Close" (click)="closeRightPanel()">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <!-- <span flex-grow *ngIf="rightPaneAction=='bookmark'">Bookmarks</span>
-      <div flex-grow *ngIf="rightPaneAction=='search'">
-        <mat-form-field appearance="standard">
-          <input matInput placeholder="Search" #epubSearchInput>
-        </mat-form-field>
-        <button mat-icon-button aria-label="Search" (click)="doSearch(epubSearchInput.value)">
-          <mat-icon>search</mat-icon>
-        </button>
-      </div>
-      <span flex-grow *ngIf="rightPaneAction=='settings'">Settings</span> -->
-    </mat-toolbar>
+  <mat-drawer #rightDrawer mode="over" position="end" right-drawer>
     <!-- Show loading while epub functions -->
     <div *ngIf="contentLoading" loading>
       <mat-spinner [strokeWidth]="3" [diameter]="40"></mat-spinner>
     </div>
 
-    <div text-center *ngIf="!contentLoading" cover-info-container>
-      <div><img [src]="ePubService.epubBookCover" alt="Cover Image" cover-image></div>
-      <div cover-title>{{ePubService.epubBookTitle}}</div>
-      <div cover-author>{{ePubService.epubBookAuthor}}</div>
-    </div>
+    <mat-tab-group mat-stretch-tabs *ngIf="!contentLoading" epub-tabs>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon tab-icon>bookmarks</mat-icon>
+        </ng-template>
+        <!-- START: Bookmark content -->
+        <mat-action-list search-results *ngIf="ePubService.currentBookmarks && ePubService.currentBookmarks.length>0">
+          <button mat-list-item *ngFor="let item of ePubService.currentBookmarks" (click)="jumpFromBookmark(item)">
+            <span>{{item.tocLabel}}</span>
+            <span bm-date> ({{item.bookmarkDate | date:'dd/MMM/yyyy'}})</span>
+          </button>
+        </mat-action-list>
+        <div padding *ngIf="!ePubService.currentBookmarks || ePubService.currentBookmarks.length==0">
+          Nothing bookmarked.
+        </div>
+        <!-- END: Bookmark content -->
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon tab-icon>search</mat-icon>
+        </ng-template>
+        <!-- START: Search content -->
+        <div padding>
+          <div flex-row>
+            <mat-form-field appearance="standard" flex-grow>
+              <input matInput placeholder="Search" #epubSearchInput>
+            </mat-form-field>
+            <button mat-icon-button aria-label="Search" (click)="doSearch(epubSearchInput.value)">
+              <mat-icon>search</mat-icon>
+            </button>
+          </div>
+          <div *ngIf="isSearching" loading>
+            <mat-spinner [strokeWidth]="3" [diameter]="30"></mat-spinner>
+          </div>
+          <div *ngIf="!isSearching && (!lastSearchResults || lastSearchResults.length==0)">
+            No search results.
+          </div>
+          <mat-action-list search-results *ngIf="!isSearching && lastSearchResults && lastSearchResults.length>0">
+            <button mat-list-item *ngFor="let item of lastSearchResults" (click)="jumpFromSearchResults(item)">
+              {{item.excerpt}} </button>
+          </mat-action-list>
+        </div>
+        <!-- END: Search content -->
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon tab-icon>error</mat-icon>
+        </ng-template>
+        <!-- START: book info content -->
+        <div text-center *ngIf="!contentLoading" cover-info-container>
+          <div><img [src]="ePubService.epubBookCover" alt="Cover Image" cover-image></div>
+          <div cover-title>{{ePubService.epubBookTitle}}</div>
+          <div cover-author>{{ePubService.epubBookAuthor}}</div>
+        </div>
+        <!-- END: book info content -->
+      </mat-tab>
+    </mat-tab-group>
 
-    <div *ngIf="!contentLoading">
-      Right Drawer Right Drawer Right Drawer Right Drawer Right Drawer Right Drawer Right Drawer Right Drawer
-    </div>
   </mat-drawer>
   <!-- END: Right Drawer to show Contextual Menus  -->
 

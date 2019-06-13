@@ -1,9 +1,9 @@
 import { Component, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDrawer } from '@angular/material/sidenav';
-import epub, { Book, Rendition } from 'epubjs';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { ThemeActionSheetComponent } from './theme-action-sheet/theme-action-sheet.component';
-import { EPubService } from './e-pub/e-pub.service';
+import { EPubService, Bookmark } from './e-pub/e-pub.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-root',
@@ -19,8 +19,12 @@ export class AppComponent implements AfterViewInit {
 
   readingAreaRect: ClientRect;
   currentChapterReadingProgress: number = 0;
+  lastSearchResults: [] = undefined;
+  isSearching: boolean = false;
 
-  constructor(private _bottomSheet: MatBottomSheet, public ePubService: EPubService) {
+  constructor(private _bottomSheet: MatBottomSheet,
+    public ePubService: EPubService,
+    private _snackBar: MatSnackBar) {
     let params = window.location.search
       .substring(1)
       .split("&")
@@ -115,14 +119,6 @@ export class AppComponent implements AfterViewInit {
   }
 
   /**
-   * Open the bookmark pane
-   */
-  // openBookMarkPane() {
-  //   this.rightPaneAction = 'bookmark';
-  //   this.rightDrawer.open();
-  // }
-
-  /**
    * Open the Search pane
    */
   openRightPane() {
@@ -140,7 +136,19 @@ export class AppComponent implements AfterViewInit {
    * Add / Remove current page to/from bookmark
    */
   toggleBookmarkCurrentPage() {
-    console.log('toggle bookmark for current page');
+    if(this.ePubService.isCurrentPageBookmarked) {
+      this.ePubService.removeBookmark(null, true).then(() => {
+        this._snackBar.open('Bookmark Removed', '', {
+          duration: 1500,
+        });
+      });
+    } else {
+      this.ePubService.bookmarkCurrentPage().then(() => {
+        this._snackBar.open('Bookmarked Successfully', '', {
+          duration: 1500,
+        });
+      });
+    }
   }
 
   /**
@@ -148,7 +156,36 @@ export class AppComponent implements AfterViewInit {
    * @param searchText the text to search with
    */
   doSearch(searchText: string) {
-    console.log('search==', searchText);
+    this.isSearching = true;
+    this.ePubService.searchBook(searchText).then((results:[]) => {
+      console.log('search==', searchText, results);
+      this.lastSearchResults = results;
+      this.isSearching = false;
+    }).catch(err => {
+      console.log('Some error while searching', err);
+    });
+  }
+
+  /**
+   * Jumpt to specific search text
+   * @param searchItem the search item
+   */
+  jumpFromSearchResults(searchItem: any) {
+    this.ePubService.jumpToCfi(searchItem.cfi).finally(() => {
+      this.rightDrawer.close();
+    });
+  }
+
+
+  /**
+   * Jumpt to specific search text
+   * @param searchItem the search item
+   */
+  jumpFromBookmark(bookmark: Bookmark) {
+    console.log('jump to bookmarked page=', bookmark);
+    this.ePubService.jumpToCfi(bookmark.endCfi, bookmark.themes).finally(() => {
+      this.rightDrawer.close();
+    });
   }
 
 }

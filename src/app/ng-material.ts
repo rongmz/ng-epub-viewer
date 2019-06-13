@@ -11,8 +11,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import {MatBottomSheetModule} from '@angular/material/bottom-sheet';
-import {MatSliderModule} from '@angular/material/slider';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
   imports: [
@@ -30,6 +32,8 @@ import {MatSliderModule} from '@angular/material/slider';
     MatProgressBarModule,
     MatBottomSheetModule,
     MatSliderModule,
+    MatTabsModule,
+    MatSnackBarModule,
   ],
   exports: [
     // MatRadioModule,
@@ -46,6 +50,8 @@ import {MatSliderModule} from '@angular/material/slider';
     MatProgressBarModule,
     MatBottomSheetModule,
     MatSliderModule,
+    MatTabsModule,
+    MatSnackBarModule,
   ],
 })
 export class NgMaterialModule { }

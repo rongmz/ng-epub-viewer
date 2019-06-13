@@ -49,7 +49,9 @@ export class EPubService {
   public epubBookTitle: string;
   public epubBookAuthor: string;
   public isCurrentPageBookmarked: boolean = false;
-  public currentThemes: { page: Theme, line: LineTheme, font: FontTheme, fontSize: FontSizeTheme } = {
+  public currentBookmarks: Bookmark[] = [];
+  private SEARCH_RESULT_LIMIT: number = 20;
+  public currentThemes: ThemeMain = {
     page: this.themes[0],
     line: this.lineHeightThemes[0],
     font: this.fontTheme[0],
@@ -74,7 +76,10 @@ export class EPubService {
       this.epubBook.loaded.metadata.then((metadata) => {
         this.epubBookTitle = metadata.title;
         this.epubBookAuthor = metadata.creator;
-        console.log('info=', this.epubBookTitle, this.epubBookAuthor);
+        this.getAllBookmarks().then(result => {
+          this.currentBookmarks = result;
+        });
+        // console.log('info=', this.epubBookTitle, this.epubBookAuthor);
       });
       // register themes
       let p = [];
@@ -129,6 +134,10 @@ export class EPubService {
       Promise.all(p).then(() => {
         this.applyCurrentThemes();
       });
+      this.checkIfCurrentPageBookmarked();
+      this.getAllBookmarks().then(result => {
+        this.currentBookmarks = result;
+      });
       console.log('book=', this.epubBook, 'rendition=', this.ePubRendition, 'cover=', this.epubBookCover);
       this.isBookLoaded = true;
     });
@@ -153,6 +162,7 @@ export class EPubService {
     if (containerId)
       readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
     if (this.ePubRendition) return this.ePubRendition.next().then(() => {
+      this.checkIfCurrentPageBookmarked();
       if (readingAreaRect)
         this.ePubRendition.resize(readingAreaRect.width, readingAreaRect.height);
       this.applyCurrentThemes();
@@ -169,6 +179,7 @@ export class EPubService {
     if (containerId)
       readingAreaRect = document.getElementById('bcontainer').getBoundingClientRect();
     if (this.ePubRendition) return this.ePubRendition.prev().then(() => {
+      this.checkIfCurrentPageBookmarked();
       if (readingAreaRect)
         this.ePubRendition.resize(readingAreaRect.width, readingAreaRect.height);
       this.applyCurrentThemes();
@@ -184,7 +195,10 @@ export class EPubService {
     let sec = this.epubBook.spine.get(tocItem.href);
     console.log('section=', sec);
     return this.ePubRendition.display(sec.index)
-      .then(() => this.applyCurrentThemes())
+      .then(() => {
+        this.applyCurrentThemes();
+        this.checkIfCurrentPageBookmarked();
+      })
       .then(() => this.ePubRendition);
   }
 
@@ -232,6 +246,129 @@ export class EPubService {
     this.applyLineHeightTheme(this.currentThemes.line);
     this.applyFontSizeTheme(this.currentThemes.fontSize);
     this.applyFontTheme(this.currentThemes.font);
+    this.checkIfCurrentPageBookmarked();
+  }
+
+  /**
+   * Perform search on book
+   * @param searchStr search string
+   */
+  searchBook(searchStr: string): Promise<[]> {
+    return Promise.all(
+      (<any>this.epubBook.spine).spineItems.map(item =>
+        item.load(this.epubBook.load.bind(this.epubBook))
+          .then(item.find.bind(item, searchStr))
+          .finally(item.unload.bind(item)))
+      ).then(results => Promise.resolve([].concat.apply([], results)))
+      .then(results => results.slice(0, this.SEARCH_RESULT_LIMIT));
+  }
+
+  /**
+   * Jump to section using cfi
+   * @param cfi the epub cfi
+   * @param withTheme apply cfi with themes
+   */
+  jumpToCfi(cfi: string, withTheme?: ThemeMain) {
+    if (withTheme) {
+      this.currentThemes = withTheme;
+      this.applyCurrentThemes();
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          this.ePubRendition.display(cfi).then(() => {
+            this.applyCurrentThemes();
+            this.checkIfCurrentPageBookmarked();
+          }).then(() => resolve()).catch((err) => reject(err));
+        }, 100);
+      });
+    } else {
+      return this.ePubRendition.display(cfi).then(() => {
+        this.applyCurrentThemes();
+        this.checkIfCurrentPageBookmarked();
+      });
+    }
+  }
+
+  /**
+   * Save current page info into bookmark
+   */
+  bookmarkCurrentPage(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let currPage: any = this.ePubRendition.currentLocation();
+      console.log('log', currPage);
+      let toc = this.epubBook.navigation.get(currPage.start.href);
+      let bookmark: Bookmark = {
+        startCfi: currPage.start.cfi,
+        endCfi: currPage.end.cfi,
+        tocLabel: ((toc&&toc.label)? toc.label.trim(): ''),
+        bookmarkDate: new Date().toISOString(),
+        themes: this.currentThemes,
+      };
+      // save to localstorage array
+      let savedBookmarks = JSON.parse(localStorage.getItem('NEV_BOOKMARKS'+ this.epubBookTitle) || '{}');
+      savedBookmarks[bookmark.startCfi] = bookmark;
+      localStorage.setItem('NEV_BOOKMARKS'+ this.epubBookTitle, JSON.stringify(savedBookmarks));
+      this.checkIfCurrentPageBookmarked();
+      this.getAllBookmarks().then(result => {
+        this.currentBookmarks = result;
+      });
+      resolve();
+    });
+  }
+
+  /**
+   * Check if this page is available in bookmark
+   */
+  checkIfCurrentPageBookmarked(): Promise<boolean> {
+    return new Promise((resolve) => {
+      let currPage: any = this.ePubRendition.currentLocation();
+      // console.log('checkpoin bookmark curr=', this, this.isCurrentPageBookmarked, currPage.start.cfi);
+      // save to localstorage array
+      let savedBookmarks = JSON.parse(localStorage.getItem('NEV_BOOKMARKS'+ this.epubBookTitle) || '{}');
+      for(let k in savedBookmarks) {
+        if(k == currPage.start.cfi) {
+          this.isCurrentPageBookmarked = true;
+          // console.log('bookmark curr=', this);
+          return resolve(this.isCurrentPageBookmarked);
+        }
+      }
+      this.isCurrentPageBookmarked = false;
+      return resolve(this.isCurrentPageBookmarked);
+    });
+  }
+
+  /**
+   * Remove Item from bookmark
+   * @param bookmarkCfi the bookmark cfi
+   */
+  removeBookmark(bookmarkCfi: string, isCurrentPage?: boolean): Promise<void> {
+    return new Promise((resolve) => {
+      let savedBookmarks = JSON.parse(localStorage.getItem('NEV_BOOKMARKS'+ this.epubBookTitle) || '{}');
+      if(isCurrentPage) {
+        let currPage: any = this.ePubRendition.currentLocation();
+        bookmarkCfi = currPage.start.cfi;
+      }
+      delete savedBookmarks[bookmarkCfi];
+      localStorage.setItem('NEV_BOOKMARKS'+ this.epubBookTitle, JSON.stringify(savedBookmarks));
+      this.checkIfCurrentPageBookmarked();
+      this.getAllBookmarks().then(result => {
+        this.currentBookmarks = result;
+      });
+      resolve();
+    });
+  }
+
+  /**
+   * Get list of all bookmarks
+   */
+  getAllBookmarks(): Promise<Bookmark[]> {
+    return new Promise((resolve) => {
+      let savedBookmarks = JSON.parse(localStorage.getItem('NEV_BOOKMARKS'+ this.epubBookTitle) || '{}');
+      let toReturn = [];
+      for(let k in savedBookmarks) {
+        toReturn.push(savedBookmarks[k]);
+      }
+      resolve(toReturn);
+    });
   }
 
 }
@@ -254,4 +391,17 @@ export interface FontSizeTheme {
 export interface FontTheme {
   name: string;
   font: string;
+}
+export interface ThemeMain {
+  page: Theme;
+  line: LineTheme;
+  font: FontTheme;
+  fontSize: FontSizeTheme;
+}
+export interface Bookmark {
+  startCfi: string;
+  endCfi: string;
+  tocLabel: string;
+  bookmarkDate: string;
+  themes: ThemeMain;
 }
