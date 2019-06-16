@@ -109,6 +109,9 @@ export class AppComponent implements AfterViewInit {
     let loc = this.ePubService.ePubRendition.currentLocation();
     loc = (<any>loc).end;
     this.currentChapterReadingProgress = Math.min((100.0 * loc.displayed.page) / loc.displayed.total, 100);
+    if(Android && Android.onPageChange) {
+      Android.onPageChange(loc.displayed.page, loc.displayed.total);
+    }
   }
 
   /**
@@ -172,6 +175,7 @@ export class AppComponent implements AfterViewInit {
    */
   jumpFromSearchResults(searchItem: any) {
     this.ePubService.jumpToCfi(searchItem.cfi).finally(() => {
+      this.updateProgressbar();
       this.rightDrawer.close();
     });
   }
@@ -184,6 +188,7 @@ export class AppComponent implements AfterViewInit {
   jumpFromBookmark(bookmark: Bookmark) {
     console.log('jump to bookmarked page=', bookmark);
     this.ePubService.jumpToCfi(bookmark.endCfi, bookmark.themes).finally(() => {
+      this.updateProgressbar();
       this.rightDrawer.close();
     });
   }

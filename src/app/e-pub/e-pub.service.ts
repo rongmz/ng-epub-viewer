@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import epub, { Book, Rendition } from 'epubjs';
 import { RenditionOptions } from 'epubjs/types/rendition';
 import { NavItem } from 'epubjs/types/navigation';
+import { localStorage } from './local-storage';
 
 @Injectable({
   providedIn: 'root'
