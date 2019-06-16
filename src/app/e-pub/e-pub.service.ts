@@ -86,12 +86,9 @@ export class EPubService {
       p.push(new Promise((resolve) => {
         this.themes.forEach((theme, i, arr) => {
           this.ePubRendition.themes.registerRules(theme.name, {
-            'body': {
+            'body, body *': {
               'color': theme.color + ' !important',
               'background-color': theme.background + ' !important'
-            },
-            'body *': {
-              'color': theme.color + ' !important'
             }
           });
           if (i == arr.length - 1) resolve();
