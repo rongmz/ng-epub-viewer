@@ -1,7 +1,7 @@
 
 // -------- START: Declaration for Android object ---------------
 declare var Android: {
-  onPageChange(page: number, totalPages: number): void;
+  onPageChange(page: number, totalPages: number, extraInfo:string): void;
   saveData(key: string, dataJson: string): void;
   getData(key: string): string;
 };

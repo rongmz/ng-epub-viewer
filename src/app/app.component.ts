@@ -61,7 +61,7 @@ export class AppComponent implements AfterViewInit {
     this.contentLoading = true;
     this.ePubService.navPrev('bcontainer').then((rendition) => {
       this.contentLoading = false;
-      this.updateProgressbar();
+      this.updateProgressbar('Left swipe on epub');
     });
   }
 
@@ -72,7 +72,7 @@ export class AppComponent implements AfterViewInit {
     this.contentLoading = true;
     this.ePubService.navNext('bcontainer').then((rendition) => {
       this.contentLoading = false;
-      this.updateProgressbar();
+      this.updateProgressbar('Right swipe on epub');
     });
   }
 
@@ -105,12 +105,12 @@ export class AppComponent implements AfterViewInit {
   /**
    * This function updates the progress bar at bottom
    */
-  updateProgressbar() {
+  updateProgressbar(extraInfo = "") {
     let loc = this.ePubService.ePubRendition.currentLocation();
     loc = (<any>loc).end;
     this.currentChapterReadingProgress = Math.min((100.0 * loc.displayed.page) / loc.displayed.total, 100);
     if(Android && Android.onPageChange) {
-      Android.onPageChange(loc.displayed.page, loc.displayed.total);
+      Android.onPageChange(loc.displayed.page, loc.displayed.total, extraInfo);
     }
   }
 
